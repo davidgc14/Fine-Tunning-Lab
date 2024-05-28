@@ -91,4 +91,9 @@ trainer = SFTTrainer(
 )
 
 # Train
-trainer.train()
+def train_model():
+    trainer.train()
+
+
+if __name__ == '__main__':
+    trainer.train()
