@@ -5,3 +5,7 @@ wandb
 .locks
 
 models-*
+
+__pycache__
+
+results
