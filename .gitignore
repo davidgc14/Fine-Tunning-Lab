@@ -1,3 +1,7 @@
 .venv
 
-model-*
+wandb
+
+.locks
+
+models-*
