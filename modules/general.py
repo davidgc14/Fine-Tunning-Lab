@@ -25,7 +25,7 @@ dataset = load_dataset(dataset_name, split="train")
 
 # Load the model + tokenizer
 # model_name = "meta-llama/Llama-2-7b-hf"
-model_name = dataset_name = config.get('BASICS', 'model')
+model_name = config.get('BASICS', 'model')
 tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
 tokenizer.pad_token = tokenizer.eos_token
 bnb_config = BitsAndBytesConfig(
