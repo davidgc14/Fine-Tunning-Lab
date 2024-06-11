@@ -2,7 +2,8 @@
 # Run this with naive pipeline parallel PP with "python test_scripts/test_pp.py"
 from datasets import load_dataset
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig, AutoTokenizer
+import os
+from transformers import AutoModelForCausalLM, AutoModelForSequenceClassification, AutoTokenizer, BitsAndBytesConfig, AutoTokenizer
 from peft import LoraConfig
 from trl import SFTTrainer
 from transformers import TrainingArguments
@@ -24,17 +25,17 @@ dataset_name = config.get('BASICS', 'dataset')
 dataset = load_dataset(dataset_name, split="train")
 
 # Load the model + tokenizer
-# model_name = "meta-llama/Llama-2-7b-hf"
 model_name = config.get('BASICS', 'model')
-tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
+tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True, pad_to_max_length=True)
 tokenizer.pad_token = tokenizer.eos_token
 bnb_config = BitsAndBytesConfig(
     load_in_4bit=True,
     bnb_4bit_quant_type="nf4",
     bnb_4bit_compute_dtype=torch.float16,
 )
-model = AutoModelForCausalLM.from_pretrained(
+model = AutoModelForSequenceClassification.from_pretrained(
     model_name,
+    num_labels=4,
     quantization_config=bnb_config,
     trust_remote_code=True,
     cache_dir='',
@@ -93,7 +94,7 @@ trainer = SFTTrainer(
     model=model,
     train_dataset=dataset,
     peft_config=peft_config,
-    dataset_text_field="text",
+    dataset_text_field="function",
     max_seq_length=max_seq_length,
     tokenizer=tokenizer,
     args=training_arguments,
@@ -102,9 +103,19 @@ trainer = SFTTrainer(
 # Train
 def train_model():
     trainer.train()
-    tokenizer.save_pretrained(output_dir)
-    model.save_pretrained(output_dir)
+    model_dir = os.path.join(output_dir, "cve")
+    tokenizer.save_pretrained(model_dir)
+    model.save_pretrained(model_dir)
+
+
+# test
+def generate_text(text):
+    inputs = tokenizer(text, return_tensors="pt").to("cuda:0")
+    outputs = model.generate(**inputs, max_new_tokens=20)
+    print(tokenizer.decode(outputs[0], skip_special_tokens=True))
+
 
 
 if __name__ == '__main__':
     trainer.train()
+    generate_text("What is love?")
