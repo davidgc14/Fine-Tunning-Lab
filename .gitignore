@@ -9,3 +9,7 @@ models-*
 __pycache__
 
 results
+
+temp*
+
+tmp*
