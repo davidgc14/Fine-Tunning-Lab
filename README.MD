@@ -1,16 +1,28 @@
-# NEW APPROACH TO FINE TUNE CUSTOM MODELS
+# NEW APPROACH TO FINE-TUNE CUSTOM MODELS
 
-Tried to do it using miniconda, but some gpu communication troubles were found. Will be studied in the future.
+I tried to do this using miniconda, but some communication problems with the GPU were encountered. It will be studied in the future.
 
-To start working with it, create a virtual enviroment and install the requirements.txt. 
+To start working with it, create a virtual environment and install the requirements.txt. 
 
 python:3.12.2
 
-Running only pp version. For other versions, CUDA>11.6 is needed and also need to run next command:
+Distributed training using multiple GPUs is not possible due to GPU version (2070). 
+With newer GPUs try to run fsdp.py 
+(Thanks to @RonanKMcGovern on GitHub).
+
 
 ```
 pip install flash-attn --no-build-isolation
 export HF_HUB_ENABLE_HF_TRANSFER=True
 ```
 
-Thanks to @RonanKMcGovern on GitHub. 
+
+## Last attempt
+
+The last try is in finetune.py. It will train a DistrilBert model for detecting CVEs vulnerabilities. 
+
+You can test this model using the test.py file.
+
+```
+torchrun --nproc_per_node=4 finetune.py
+```
